@@ -85,6 +85,15 @@ echo "[CREATING STACK DIRECTORIES] - under ~/log-stack..."
 mkdir -p ~/log-stack/grafana-data ~/log-stack/loki-data && sudo chown -R root:root ~/log-stack && sudo chmod -R 777 ~/log-stack
 sudo mkdir -p /etc/promtail
 
+# some more changes-HOPEFULLY THEY WORK
+mkdir -p ~/log-stack/grafana-data ~/log-stack/loki-data
+# Set Loki directory permissions to allow UID 10001 to write (Loki's default user)
+sudo chown -R 10001:10001 ~/log-stack/loki-data
+sudo chmod -R 775 ~/log-stack/loki-data
+# Keep Grafana writable as root
+sudo chown -R root:root ~/log-stack/grafana-data
+sudo chmod -R 777 ~/log-stack/grafana-data
+
 # Create config files (from your markdown)
 echo "[CREATING LOKI & PROMTAIL] - config files"
 cat > ~/log-stack/loki-config.yaml <<'LOKI_CFG'
@@ -163,9 +172,26 @@ fi
 
 # Run Loki container
 echo "[STATUS] - Running Loki container..."
+
+# checks for Loki ownership and perms stuff
+# Ensure Loki data directory exists and is accessible to UID 10001
+sudo mkdir -p ~/log-stack/loki-data
+sudo chown -R 10001:10001 ~/log-stack/loki-data
+sudo chmod -R 775 ~/log-stack/loki-data
+
 sudo docker rm -f loki 2>/dev/null || true
+
+# making a small change in running loki container
+# sudo docker run -d --name loki \
+#   --network ${NET_NAME} \
+#   -v ~/log-stack/loki-data:/loki \
+#   -v ~/log-stack/loki-config.yaml:/etc/loki/local-config.yaml:ro \
+#   grafana/loki:2.9.0 \
+#   -config.file=/etc/loki/local-config.yaml
+
 sudo docker run -d --name loki \
   --network ${NET_NAME} \
+  -u 10001 \
   -v ~/log-stack/loki-data:/loki \
   -v ~/log-stack/loki-config.yaml:/etc/loki/local-config.yaml:ro \
   grafana/loki:2.9.0 \
