@@ -48,7 +48,7 @@ sudo sed -i 's/^#\s*input(type="imtcp" port="514")/input(type="imtcp" port="514"
 
 # Create forwarding rule for remote logs
 echo "[WRITING FORWARDING SCRIPT] - Writing to /etc/rsyslog.d/remote.conf"
-sudo bash -c 'cat > /etc/rsyslog.d/remote.conf <<EOF
+sudo bash -c 'cat > /etc/rsyslog.d/50-remote.conf <<EOF
 template(name="RemoteLogsByHost" type="string" string="/var/log/remote/%HOSTNAME%.log")
 
 if \$fromhost-ip != "127.0.0.1" then {
@@ -181,11 +181,16 @@ sudo chmod -R 775 ~/log-stack/loki-data
 
 sudo docker rm -f loki 2>/dev/null || true
 
+# newly ADDED to remove existing loki container if any
+sudo docker rm -f loki
+
+
 # adding the WAL directory thing
 # Create Loki data directories
 mkdir -p ~/loki-data/chunks ~/loki-data/index ~/loki-data/wal
 
 # Set proper permissions
+sudo chown -R 10001:10001 ~/loki-data
 sudo chmod -R 777 ~/loki-data
 
 # making a small change in running loki container
@@ -197,16 +202,29 @@ sudo chmod -R 777 ~/loki-data
 #   -config.file=/etc/loki/local-config.yaml
 
 # added the below three things- chunks, index and the wal. If pipeline breaks, remove the last three -v and well, redo the things
-sudo docker run -d --name loki \
-  --network ${NET_NAME} \
+# sudo docker run -d --name loki \
+#   --network ${NET_NAME} \
+#   -u 10001 \
+#   -v ~/log-stack/loki-data:/loki \
+#   -v ~/log-stack/loki-config.yaml:/etc/loki/local-config.yaml:ro \
+#   -v ~/loki-data/chunks:/loki/chunks \
+#   -v ~/loki-data/index:/loki/index \
+#   -v ~/loki-data/wal:/wal \
+#   grafana/loki:2.9.0 \
+#   -config.file=/etc/loki/local-config.yaml
+
+sudo docker run -d \
+  --name loki \
+  --network log-network \
   -u 10001 \
-  -v ~/log-stack/loki-data:/loki \
-  -v ~/log-stack/loki-config.yaml:/etc/loki/local-config.yaml:ro \
+  -p 3100:3100 \
   -v ~/loki-data/chunks:/loki/chunks \
   -v ~/loki-data/index:/loki/index \
   -v ~/loki-data/wal:/wal \
+  -v ~/log-stack/loki-config.yaml:/etc/loki/local-config.yaml:ro \
   grafana/loki:2.9.0 \
   -config.file=/etc/loki/local-config.yaml
+
 
 # Run Grafana container
 echo "[STATUS] - Running Grafana container..."
@@ -235,6 +253,9 @@ echo "Default Login -> admin / admin"
 echo "Add Loki datasource -> URL: http://loki:3100"
 echo "-----------------------------------------"
 echo "To check live logs: sudo tail -f /var/log/remote/*.log"
+echo "\nAlso, check whether or no that all the data you get can be sent to Loki"
+echo "For the same, run:- curl http://localhost:3100/ready"
+echo "If you get a response 'ready', you're good to go!"
 echo "[SETUP COMPLETE] - Les Go!"
 
 # End
