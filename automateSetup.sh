@@ -146,6 +146,7 @@ PROMTAIL_CFG
 
 # Pull necessary Docker images
 echo "[PULLING DOCKER IMAGES] - of loki, grafana and promtail"
+sudo systemctl restart docker
 sudo docker pull grafana/loki:2.9.0
 sudo docker pull grafana/grafana:10.0.0
 sudo docker pull grafana/promtail:2.9.0
