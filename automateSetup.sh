@@ -123,7 +123,7 @@ limits_config:
   enforce_metric_name: false
 LOKI_CFG
 
-cat > /etc/promtail/promtail.yaml <<'PROMTAIL_CFG'
+sudo tee /etc/promtail/promtail.yaml > /dev/null <<'PROMTAIL_CFG'
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
