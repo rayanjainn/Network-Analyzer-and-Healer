@@ -20,7 +20,7 @@ sed -i 's/^#\s*input(type="imudp" port="514")/input(type="imudp" port="514")/' /
 sed -i 's/^#\s*module(load="imtcp")/module(load="imtcp")/' /etc/rsyslog.conf || true
 sed -i 's/^#\s*input(type="imtcp" port="514")/input(type="imtcp" port="514")/' /etc/rsyslog.conf || true
 
-cat > /etc/rsyslog.d/remote.conf <<'EOF'
+cat > /etc/rsyslog.d/50-remote.conf <<'EOF'
 template(name="RemoteLogsByHost" type="string" string="/var/log/remote/%HOSTNAME%.log")
 
 if $fromhost-ip != '127.0.0.1' then {
