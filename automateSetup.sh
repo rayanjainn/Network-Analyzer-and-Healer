@@ -35,8 +35,8 @@ sudo systemctl status rsyslog --no-pager || true
 # Setup remote log directory
 echo "[SETTING UP REMOTE LOG DIRECTORY] - Creating /var/log/remote and setting permissions..."
 sudo mkdir -p /var/log/remote
-sudo chown -R $USER:$USER /var/log/remote
-sudo chmod -R 755 /var/log/remote
+sudo chown -R root:root /var/log/remote
+sudo chmod -R 777 /var/log/remote
 
 # Update /etc/rsyslog.conf to enable UDP/TCP reception (uncomment matching lines if present)
 echo "[EDITING THE syslog.conf FILE] - @ /etc/rsyslog.conf"
@@ -60,7 +60,7 @@ EOF'
 # Ensure rsyslog dir perms and restart
 sudo mkdir -p /var/log/remote
 sudo chmod 755 /var/log/remote
-sudo chown syslog:syslog /var/log/remote || true
+sudo chown root:root /var/log/remote || true
 sudo systemctl restart rsyslog
 echo "[RSYSLOG SETUP COMPLETE]"
 
@@ -82,7 +82,7 @@ echo "[SUCCESS] - Docker Installed"
 
 # Create stack directories
 echo "[CREATING STACK DIRECTORIES] - under ~/log-stack..."
-mkdir -p ~/log-stack/grafana-data ~/log-stack/loki-data
+mkdir -p ~/log-stack/grafana-data ~/log-stack/loki-data && sudo chown -R root:root ~/log-stack && sudo chmod -R 777 ~/log-stack
 sudo mkdir -p /etc/promtail
 
 # Create config files (from your markdown)
@@ -143,6 +143,7 @@ scrape_configs:
           host: ${HOSTNAME}
           __path__: /var/log/remote/*.log
 PROMTAIL_CFG
+sudo chmod 644 /etc/promtail/promtail.yaml
 
 # Pull necessary Docker images
 echo "[PULLING DOCKER IMAGES] - of loki, grafana and promtail"
