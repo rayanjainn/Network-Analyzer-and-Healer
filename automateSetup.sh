@@ -181,6 +181,13 @@ sudo chmod -R 775 ~/log-stack/loki-data
 
 sudo docker rm -f loki 2>/dev/null || true
 
+# adding the WAL directory thing
+# Create Loki data directories
+mkdir -p ~/loki-data/chunks ~/loki-data/index ~/loki-data/wal
+
+# Set proper permissions
+sudo chmod -R 777 ~/loki-data
+
 # making a small change in running loki container
 # sudo docker run -d --name loki \
 #   --network ${NET_NAME} \
@@ -189,11 +196,15 @@ sudo docker rm -f loki 2>/dev/null || true
 #   grafana/loki:2.9.0 \
 #   -config.file=/etc/loki/local-config.yaml
 
+# added the below three things- chunks, index and the wal. If pipeline breaks, remove the last three -v and well, redo the things
 sudo docker run -d --name loki \
   --network ${NET_NAME} \
   -u 10001 \
   -v ~/log-stack/loki-data:/loki \
   -v ~/log-stack/loki-config.yaml:/etc/loki/local-config.yaml:ro \
+  -v ~/loki-data/chunks:/loki/chunks \
+  -v ~/loki-data/index:/loki/index \
+  -v ~/loki-data/wal:/wal \
   grafana/loki:2.9.0 \
   -config.file=/etc/loki/local-config.yaml
 
