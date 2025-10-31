@@ -8,6 +8,8 @@ This repository automates an **on-premise observability and log aggregation pipe
 - **Loki** — log aggregation backend
 - **Grafana** — visualization and analysis dashboard
 
+> The above is the analyzer part-healer stack will be added soon
+
 ---
 
 ## Architecture Overview
@@ -40,9 +42,14 @@ cd Network-Analyzer-and-Healer
 
 # Make automation scripts executable
 chmod +x scripts/*.sh
+chmod +x ./automateSetup.sh
+chmod +x ./restart.sh
 
 # Run the automated setup
-./scripts/automateSetup.sh
+./automateSetup.sh
+
+# In case there is some problem in the intermediate steps, then, run the following command
+./restart.sh
 ```
 
 The script will:
@@ -91,6 +98,13 @@ Default Grafana credentials:
 | Rsyslog not sending | UDP/TCP port blocked | `sudo ufw allow 514/tcp` |
 
 ---
+
+## Version History
+| Version | Date | Description | Status |
+|---------|------|-------------|--------|
+| v1.0.0  | TBA  | Automated Setup of the whole Project, with Log aggregation | `IN-PROGRESS` |
+| v1.0.1  | TBA  | Adding Basic Log interpretation, and base recovery queries | `IN-PROGRESS` |
+| v2.0.0  | TBA  | Fulling running Repository | `TO-DO` |
 
 ## License
 
