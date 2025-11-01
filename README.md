@@ -102,7 +102,7 @@ Default Grafana credentials:
 ## Version History
 | Version | Date | Description | Status |
 |---------|------|-------------|--------|
-| v1.0.0  | TBA  | Automated Setup of the whole Project, with Log aggregation | `IN-PROGRESS` |
+| v1.0.0  | 1st November, 2025  | Automated Setup of the whole Project, with Log aggregation | `IN-PROGRESS` |
 | v1.0.1  | TBA  | Adding Basic Log interpretation, and base recovery queries | `IN-PROGRESS` |
 | v2.0.0  | TBA  | Fulling running Repository | `TO-DO` |
 
