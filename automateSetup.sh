@@ -24,6 +24,12 @@ echo "Updating apt and installing packages..."
 sudo apt update -y
 sudo apt install -y rsyslog curl apt-transport-https ca-certificates gnupg lsb-release software-properties-common
 
+# this was some optional shi-if this makes it work, then it is DEFINITELY NOT OPTINAL!
+sudo chmod o+r /var/log/syslog
+sudo chmod o+r /var/log/auth.log
+# THIS FCKIN SHI WAS THE MAIN THING!
+
+
 # Enable and start rsyslog
 echo "Enabling and restarting rsyslog..."
 
@@ -48,7 +54,7 @@ sudo sed -i 's/^#\s*input(type="imtcp" port="514")/input(type="imtcp" port="514"
 
 # Create forwarding rule for remote logs
 echo "[WRITING FORWARDING SCRIPT] - Writing to /etc/rsyslog.d/remote.conf"
-sudo bash -c 'cat > /etc/rsyslog.d/50-remote.conf <<EOF
+sudo bash -c 'cat > /etc/rsyslog.d/remote.conf <<EOF
 template(name="RemoteLogsByHost" type="string" string="/var/log/remote/%HOSTNAME%.log")
 
 if \$fromhost-ip != "127.0.0.1" then {
@@ -59,8 +65,8 @@ EOF'
 
 # Ensure rsyslog dir perms and restart
 sudo mkdir -p /var/log/remote
-sudo chmod 755 /var/log/remote
-sudo chown root:root /var/log/remote || true
+sudo chown syslog:adm /var/log/remote
+sudo chmod 775 /var/log/remote
 sudo systemctl restart rsyslog
 echo "[RSYSLOG SETUP COMPLETE]"
 
