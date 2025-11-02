@@ -1,6 +1,7 @@
 ![Script Test](https://img.shields.io/github/actions/workflow/status/Th3C0d3Mast3r/Network-Analyzer-and-Healer/server_setup_test.yaml?branch=main&label=SCRIPT%20STATUS&logo=github)
 ![License](https://img.shields.io/github/license/Th3C0d3Mast3r/Network-Analyzer-and-Healer)
 ![Last Commit](https://img.shields.io/github/last-commit/Th3C0d3Mast3r/Network-Analyzer-and-Healer)
+![Version](https://img.shields.io/github/v/tag/Th3C0d3Mast3r/Network-Analyzer-and-Healer?label=VERSION&color=brightgreen&logo=git)
 
 # Network Analyzer & Healer  
 ### Rsyslog → Promtail → Loki → Grafana Stack
@@ -106,7 +107,7 @@ Default Grafana credentials:
 ## Version History
 | Version | Date | Description | Status |
 |---------|------|-------------|--------|
-| v1.0.0  | 1st November, 2025  | Automated Setup of the whole Project, with Log aggregation | `IN-PROGRESS` |
+| v1.0.0  | 1st November, 2025  | Automated Setup of the whole Project, with Log aggregation | `COMPLETED` |
 | v1.0.1  | TBA  | Adding Basic Log interpretation, and base recovery queries | `IN-PROGRESS` |
 | v2.0.0  | TBA  | Fulling running Repository | `TO-DO` |
 
