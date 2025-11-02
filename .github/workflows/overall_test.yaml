@@ -41,6 +41,8 @@ jobs:
           FROM ubuntu:22.04
           ENV DEBIAN_FRONTEND=noninteractive
           RUN apt-get update -y && apt-get install -y sudo systemctl
+          # remove preinstalled containerd to avoid Docker conflicts
+          RUN apt-get remove -y containerd || true
           COPY automateSetup.sh /root/automateSetup.sh
           RUN chmod +x /root/automateSetup.sh && bash /root/automateSetup.sh
           EXPOSE 514/tcp 514/udp 3100 3000
