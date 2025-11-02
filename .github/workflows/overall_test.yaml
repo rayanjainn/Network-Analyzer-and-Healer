@@ -40,11 +40,15 @@ jobs:
           cat > ./server/Dockerfile <<'EOF'
           FROM ubuntu:22.04
           ENV DEBIAN_FRONTEND=noninteractive
-          RUN apt-get update -y && apt-get install -y sudo systemctl
-          # --- FIX: completely purge built-in containerd before installing Docker ---
-          RUN apt-get remove -y containerd containerd.io docker docker-engine docker.io || true && \
-              apt-get purge -y containerd containerd.io docker docker-engine docker.io || true && \
-              apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+          RUN apt-get update -y && apt-get install -y sudo systemctl curl gnupg lsb-release ca-certificates
+          # --- MINIMAL FIX: avoid containerd conflict by masking it instead of removing ---
+          RUN systemctl mask containerd || true
+          RUN mkdir -p /usr/share/keyrings && \
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker.gpg && \
+              echo "deb [arch=\$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
+              apt-get update -y && \
+              apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin || \
+              (apt-get -f install -y && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin)
           COPY automateSetup.sh /root/automateSetup.sh
           RUN chmod +x /root/automateSetup.sh && bash /root/automateSetup.sh
           EXPOSE 514/tcp 514/udp 3100 3000
