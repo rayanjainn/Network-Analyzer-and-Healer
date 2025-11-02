@@ -1,3 +1,7 @@
+![Script Test](https://img.shields.io/github/actions/workflow/status/Th3C0d3Mast3r/Network-Analyzer-and-Healer/server_setup_test.yaml?branch=main&label=SCRIPT%20STATUS&logo=github)
+![License](https://img.shields.io/github/license/Th3C0d3Mast3r/Network-Analyzer-and-Healer)
+![Last Commit](https://img.shields.io/github/last-commit/Th3C0d3Mast3r/Network-Analyzer-and-Healer)
+
 # Network Analyzer & Healer  
 ### Rsyslog → Promtail → Loki → Grafana Stack
 
