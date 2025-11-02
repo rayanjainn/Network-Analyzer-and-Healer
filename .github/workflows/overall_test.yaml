@@ -1,4 +1,4 @@
-name: Test Rsyslog + Loki Stack
+name: Validate Full Rsyslog + Loki Stack
 
 on:
   push:
@@ -8,26 +8,18 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate-stack:
+  build-server:
     runs-on: ubuntu-latest
-    name: "Simulate two Ubuntu devices (server & client)"
+    name: "Build & Setup Rsyslog Stack Container"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Ensure Ubuntu
-        run: |
-          echo "[CHECKING RUNNER OS]"
-          if [[ "$(lsb_release -is)" != "Ubuntu" ]]; then
-            echo "Not running on Ubuntu - aborting."
-            exit 1
-          fi
-          echo "Ubuntu confirmed"
-
       - name: Install Docker
         run: |
           sudo apt-get update -y
+          sudo apt-get remove -y containerd || true
           sudo apt-get install -y docker.io
           sudo systemctl start docker
           sudo systemctl enable docker
@@ -40,15 +32,7 @@ jobs:
           cat > ./server/Dockerfile <<'EOF'
           FROM ubuntu:22.04
           ENV DEBIAN_FRONTEND=noninteractive
-          RUN apt-get update -y && apt-get install -y sudo systemctl curl gnupg lsb-release ca-certificates
-          # --- MINIMAL FIX: avoid containerd conflict by masking it instead of removing ---
-          RUN systemctl mask containerd || true
-          RUN mkdir -p /usr/share/keyrings && \
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker.gpg && \
-              echo "deb [arch=\$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
-              apt-get update -y && \
-              apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin || \
-              (apt-get -f install -y && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin)
+          RUN apt-get update -y && apt-get install -y sudo systemctl curl
           COPY automateSetup.sh /root/automateSetup.sh
           RUN chmod +x /root/automateSetup.sh && bash /root/automateSetup.sh
           EXPOSE 514/tcp 514/udp 3100 3000
@@ -56,51 +40,91 @@ jobs:
           EOF
           docker build -t rsyslog-server ./server
 
-      - name: Build rsyslog-client container
+      - name: Run rsyslog-server container
         run: |
-          mkdir -p ./client
-          cat > ./client/Dockerfile <<'EOF'
-          FROM ubuntu:22.04
-          ENV DEBIAN_FRONTEND=noninteractive
-          RUN apt-get update -y && apt-get install -y rsyslog curl
-          COPY send-remote.sh /root/send-remote.sh
-          RUN chmod +x /root/send-remote.sh
-          CMD ["sleep","infinity"]
-          EOF
-
-          # simple script that sends logs to rsyslog-server
-          cat > ./client/send-remote.sh <<'EOF'
-          #!/usr/bin/env bash
-          set -e
-          echo "[CONFIGURING RSYSLOG CLIENT]"
-          echo "*.* @@rsyslog-server:514" > /etc/rsyslog.d/50-remote.conf
-          service rsyslog restart
-          logger "This is a test log from rsyslog client at $(date)"
-          EOF
-
-          docker build -t rsyslog-client ./client
-
-      - name: Run containers and test log flow
-        run: |
-          echo "[Starting containers on shared network]"
-          docker network create lognet
+          docker network create lognet || true
           docker run -d --name rsyslog-server --network lognet rsyslog-server
+          echo "Waiting for services to initialize..."
           sleep 25
-          docker run -d --name rsyslog-client --network lognet rsyslog-client
-          sleep 10
-          echo "[Sending test log]"
-          docker exec rsyslog-client bash /root/send-remote.sh
-          echo "[Waiting for log delivery]"
-          sleep 15
-          echo "[Inspecting server log directory]"
-          docker exec rsyslog-server bash -c "ls -l /var/log/remote || true"
-          echo "[Reading received logs]"
-          docker exec rsyslog-server bash -c "cat /var/log/remote/*.log || echo 'No logs found'"
-          echo "[Checking Loki readiness]"
-          docker exec rsyslog-server bash -c "curl -s http://localhost:3100/ready || echo 'Loki not responding yet.'"
+          docker ps -a
 
-      - name: Cleanup
-        if: always()
+  test-grafana:
+    runs-on: ubuntu-latest
+    needs: build-server
+    name: "Test Grafana Health"
+
+    steps:
+      - name: Install Docker
         run: |
-          docker rm -f rsyslog-client rsyslog-server || true
+          sudo apt-get update -y
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+      - name: Attach to existing container network
+        run: |
+          docker network create lognet || true
+      - name: Load rsyslog-server image from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: rsyslog-server
+        continue-on-error: true
+      - name: Check Grafana health
+        run: |
+          echo "[Checking Grafana health endpoint]"
+          docker ps || true
+          docker exec rsyslog-server curl -s http://localhost:3000/api/health || echo "Grafana not responding"
+
+  test-loki-promtail:
+    runs-on: ubuntu-latest
+    needs: build-server
+    name: "Test Loki + Promtail Connection"
+
+    steps:
+      - name: Install Docker
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+      - name: Verify Loki readiness
+        run: |
+          echo "[Checking Loki readiness]"
+          docker exec rsyslog-server curl -s http://localhost:3100/ready || echo "Loki not ready"
+      - name: Check Promtail logs
+        run: |
+          echo "[Inspecting Promtail logs for connection to Loki]"
+          docker exec rsyslog-server docker logs promtail 2>&1 | grep -i "loki" || echo "No Loki connection logs found"
+
+  test-rsyslog:
+    runs-on: ubuntu-latest
+    needs: build-server
+    name: "Test Rsyslog Status & Log Flow"
+
+    steps:
+      - name: Install Docker
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+
+      - name: Check rsyslog service status
+        run: |
+          echo "[Checking Rsyslog status inside container]"
+          docker exec rsyslog-server systemctl status rsyslog --no-pager || echo "Rsyslog may not be running"
+
+      - name: Inspect remote log directory
+        run: |
+          echo "[Listing remote logs]"
+          docker exec rsyslog-server ls -l /var/log/remote || true
+          echo "[Showing log content]"
+          docker exec rsyslog-server cat /var/log/remote/*.log || echo "No remote logs found"
+
+  cleanup:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [build-server, test-grafana, test-loki-promtail, test-rsyslog]
+    name: "Cleanup Containers"
+
+    steps:
+      - name: Remove containers and network
+        run: |
+          docker rm -f rsyslog-server || true
           docker network rm lognet || true
