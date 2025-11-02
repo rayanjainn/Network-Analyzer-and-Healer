@@ -41,8 +41,10 @@ jobs:
           FROM ubuntu:22.04
           ENV DEBIAN_FRONTEND=noninteractive
           RUN apt-get update -y && apt-get install -y sudo systemctl
-          # remove preinstalled containerd to avoid Docker conflicts
-          RUN apt-get remove -y containerd || true
+          # --- FIX: completely purge built-in containerd before installing Docker ---
+          RUN apt-get remove -y containerd containerd.io docker docker-engine docker.io || true && \
+              apt-get purge -y containerd containerd.io docker docker-engine docker.io || true && \
+              apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
           COPY automateSetup.sh /root/automateSetup.sh
           RUN chmod +x /root/automateSetup.sh && bash /root/automateSetup.sh
           EXPOSE 514/tcp 514/udp 3100 3000
