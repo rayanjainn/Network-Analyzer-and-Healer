@@ -6,7 +6,7 @@ scrape_configs:
     static_configs:
       - targets: ["cadvisor:8080"]
 
-  - job_name: otherPC
+  - job_name: PC1
     static_configs:
       - targets: ["<IP_ADDRESS>:9100"]  # Replace <IP_ADDRESS> with the actual IP of the other PC running node-exporter
      
