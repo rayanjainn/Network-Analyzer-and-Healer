@@ -3,19 +3,27 @@
 # File: automateSetup.sh
 # Make executable: chmod +x automateSetup.sh
 
-echo "[Checking OS]"
+# ====== COLORS ======
+GREEN="\033[0;32m"
+YELLOW="\033[1;33m"
+RED="\033[0;31m"
+BLUE="\033[0;34m"
+BOLD="\033[1m"
+r="\033[0m"
+
+echo -e "${YELLOW}[Checking OS]${r}"
 if [[ -f /etc/os-release ]]; then
     . /etc/os-release
     if [[ "$ID" != "ubuntu" ]]; then
-        echo "NOT UBUNTU FILE STRUCTURE - NICE TRY D..."
+        echo -e "${RED}NOT UBUNTU FILE STRUCTURE - NICE TRY D...${r}"
         exit 1
     fi
 else
-    echo "NOT UBUNTU FILE STRUCTURE - NICE TRY D..."
+    echo "${RED}NOT UBUNTU FILE STRUCTURE - NICE TRY D...${r}"
     exit 1
 fi
 
-echo "[SUCCESSFUL] - UBUNTU DETECTED"
+echo -e "${GREEN}[SUCCESSFUL] - ${BOLD}UBUNTU DETECTED${r}"
 
 set -euo pipefail
 
@@ -31,7 +39,7 @@ sudo chmod o+r /var/log/auth.log
 
 
 # Enable and start rsyslog
-echo "Enabling and restarting rsyslog..."
+echo -e "${BOLD}Enabling and restarting rsyslog...${r}"
 
 sudo systemctl enable rsyslog
 sudo systemctl restart rsyslog
@@ -39,13 +47,13 @@ sleep 2
 sudo systemctl status rsyslog --no-pager || true
 
 # Setup remote log directory
-echo "[SETTING UP REMOTE LOG DIRECTORY] - Creating /var/log/remote and setting permissions..."
+echo -e "${YELLOW}[SETTING UP REMOTE LOG DIRECTORY]${r} - Creating /var/log/remote and setting permissions..."
 sudo mkdir -p /var/log/remote
 sudo chown -R root:root /var/log/remote
 sudo chmod -R 777 /var/log/remote
 
 # Update /etc/rsyslog.conf to enable UDP/TCP reception (uncomment matching lines if present)
-echo "[EDITING THE syslog.conf FILE] - @ /etc/rsyslog.conf"
+echo -e "${GREEN}[EDITING THE syslog.conf FILE] - @ /etc/rsyslog.conf${r}"
 sudo cp /etc/rsyslog.conf /etc/rsyslog.conf.bak || true
 sudo sed -i 's/^#\s*module(load="imudp")/module(load="imudp")/' /etc/rsyslog.conf || true
 sudo sed -i 's/^#\s*input(type="imudp" port="514")/input(type="imudp" port="514")/' /etc/rsyslog.conf || true
@@ -53,7 +61,7 @@ sudo sed -i 's/^#\s*module(load="imtcp")/module(load="imtcp")/' /etc/rsyslog.con
 sudo sed -i 's/^#\s*input(type="imtcp" port="514")/input(type="imtcp" port="514")/' /etc/rsyslog.conf || true
 
 # Create forwarding rule for remote logs
-echo "[WRITING FORWARDING SCRIPT] - Writing to /etc/rsyslog.d/remote.conf"
+echo -e "${GREEN}[WRITING FORWARDING SCRIPT] - Writing to /etc/rsyslog.d/remote.conf${r}"
 sudo bash -c 'cat > /etc/rsyslog.d/remote.conf <<EOF
 template(name="RemoteLogsByHost" type="string" string="/var/log/remote/%HOSTNAME%.log")
 
@@ -68,23 +76,35 @@ sudo mkdir -p /var/log/remote
 sudo chown syslog:adm /var/log/remote
 sudo chmod 775 /var/log/remote
 sudo systemctl restart rsyslog
-echo "[RSYSLOG SETUP COMPLETE]"
+echo -e "${GREEN}[RSYSLOG SETUP COMPLETE]${r}"
 
-# Install Docker (official repo) and docker compose plugin
-echo "[INSTALLING DOCKER] - along with Docker Compose Plugin..."
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] \
-https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update -y
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+echo -e "${YELLOW}Checking Docker present on device or no. . . .${r}"
 
-# Add current user to docker group (non-blocking)
-if ! groups $USER | grep -q '\bdocker\b'; then
-    echo "Adding $USER to docker group (you may need to re-login for group changes)..."
-    sudo usermod -aG docker $USER || true
+# Proceed only if Docker is not installed
+if ! command -v docker &> /dev/null; then
+
+    # Install Docker (official repo) and docker compose plugin
+    echo -e "${YELLOW}[INSTALLING DOCKER]${r} - along with Docker Compose Plugin..."
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] \
+    https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt update -y
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+    # Add current user to docker group (non-blocking)
+    if ! groups $USER | grep -q '\bdocker\b'; then
+        echo "Adding $USER to docker group (you may need to re-login for group changes)..."
+        sudo usermod -aG docker $USER || true
+    fi
+
+    echo -e "${GREEN}[SUCCESS] - Docker Installed${r}"
+
+else
+    echo -e "${BLUE}[SKIPPED] - Docker already installed on this system.${r}"
 fi
 
-echo "[SUCCESS] - Docker Installed"
+
+echo -e "${GREEN}[SUCCESS] - Docker Installed${r}"
 
 # Create stack directories
 echo "[CREATING STACK DIRECTORIES] - under ~/log-stack..."
@@ -161,7 +181,7 @@ PROMTAIL_CFG
 sudo chmod 644 /etc/promtail/promtail.yaml
 
 # Pull necessary Docker images
-echo "[PULLING DOCKER IMAGES] - of loki, grafana and promtail"
+echo -e "${YELLOW}[PULLING DOCKER IMAGES]${r} - of loki, grafana and promtail"
 sudo systemctl restart docker
 sudo docker pull grafana/loki:2.9.0
 sudo docker pull grafana/grafana:10.0.0
@@ -177,7 +197,7 @@ else
 fi
 
 # Run Loki container
-echo "[STATUS] - Running Loki container..."
+echo -e "${YELLOW}[STATUS] - Running Loki container...${r}"
 
 # checks for Loki ownership and perms stuff
 # Ensure Loki data directory exists and is accessible to UID 10001
@@ -233,7 +253,7 @@ sudo docker run -d \
 
 
 # Run Grafana container
-echo "[STATUS] - Running Grafana container..."
+echo -e "${YELLOW}[STATUS] - Running Grafana container...${r}"
 sudo docker rm -f grafana 2>/dev/null || true
 sudo docker run -d --name grafana \
   --network ${NET_NAME} \
@@ -242,7 +262,7 @@ sudo docker run -d --name grafana \
   grafana/grafana:10.0.0
 
 # Run Promtail container
-echo "[STATUS] - Running Promtail container..."
+echo -e "${YELLOW}[STATUS] - Running Promtail container...${r}"
 sudo docker rm -f promtail 2>/dev/null || true
 sudo docker run -d --name promtail \
   --network ${NET_NAME} \
@@ -252,17 +272,17 @@ sudo docker run -d --name promtail \
   -config.file=/etc/promtail/promtail.yaml \
   -config.expand-env=true
 
-echo "All containers are up and running!"
+echo -e "${GREEN}All containers are ${BOLD}UP and RUNNING${r}!${r}"
 echo "-----------------------------------------"
 echo "Access Grafana at: http://localhost:3000"
 echo "Default Login -> admin / admin"
 echo "Add Loki datasource -> URL: http://loki:3100"
 echo "-----------------------------------------"
-echo "To check live logs: sudo tail -f /var/log/remote/*.log"
+echo -e "To check live logs: ${BOLD}sudo tail -f /var/log/remote/*.log${r}"
 echo "Also, check whether or no that all the data you get can be sent to Loki"
 echo "------------------------------------------"
 echo "For the same, run:- curl http://localhost:3100/ready"
 echo "If you get a response 'ready', you're good to go!"
-echo "[SETUP COMPLETE] - Les Go!"
+echo -e "${GREEN}[${BOLD}SETUP COMPLETE${r}]${r} - Les Go!"
 
 # End
