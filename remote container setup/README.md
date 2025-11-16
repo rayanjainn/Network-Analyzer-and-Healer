@@ -14,3 +14,9 @@ chmod +x remoteConfig.sh
 # replace the IP below with the actual IP of the Rsyslog Server
 ./remoteConfig.sh --<IP_OF_SYSLOG_SERVER> 
 ```
+
+> The main aim of this file is to-
+>(1) Send the Logs to the Rsyslog Server [thus, setting up 50-remote.conf]
+>(2) Send the device metrics to the Rsyslog Server [using node-exporter]
+>(3) Send the container metrics to the Rsyslog Server [using cAdvisor]
+>(4) Open the SSH port for the device, so that, we can SSH to heal the device (if needed, we can open SSH for Rsyslog only) 

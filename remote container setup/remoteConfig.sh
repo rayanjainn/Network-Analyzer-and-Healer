@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Argument check for taking the RSYSLOG SERVER'S IP 
 if [ -z "$1" ];then
     echo "Usage: $0 --<RSYSLOG_SERVER_IP>"
     exit 1
 fi
 
-# Extract IP from --IP
 RSYSLOG_IP="${1#--}"
 
 # this will start the node-exporter on your DEVICE along with sending the rsyslog to the rsyslog server
@@ -75,3 +73,41 @@ sudo docker run -d \
   --path.rootfs=/host
 
 echo -e "${GREEN}${BOLD}[NODE-EXPORTER SETUP COMPLETE]${RESET}"
+
+# NOW, WE DOWNLOAD FOR cAdvisor (in case there are containers running on the Device)
+echo -e "${BOLD}INITIATING DOWNLOAD FOR CADVISOR...${RESET}"
+
+# Pull and run cAdvisor container
+sudo docker run -d \
+  --name=cadvisor \
+  --volume=/:/rootfs:ro \
+  --volume=/var/run:/var/run:ro \
+  --volume=/sys:/sys:ro \
+  --volume=/var/lib/docker/:/var/lib/docker:ro \
+  --publish=8080:8080 \
+  --detach=true \
+  --restart=always \
+  google/cadvisor:latest
+
+echo -e "${GREEN}${BOLD}[CADVISOR SETUP COMPLETE]${RESET}"
+
+
+echo -e "${BOLD}SETTING UP SSH FOR REMOTE ACCESS...${RESET}"
+
+sudo apt install -y openssh-server
+sudo systemctl enable ssh
+sudo systemctl restart ssh
+sudo systemctl status ssh --no-pager || true
+
+PC_NAME=$(hostname)
+IP_ADDR=$(hostname -I | awk '{print $1}')
+echo "======================================================================"
+echo -e "${BOLD}ADD THE FOLLOWING TO THE TOML FILE WHICH WILL THEN BE USED TO CONFIGURE PROMETHEUS:${RESET}\n"
+echo -e "\n${PC_NAME}_cAdvisor =====> ${IP_ADDR}:8080"
+echo -e "${PC_NAME}_NodeExport ===> ${IP_ADDR}:9100"
+echo "======================================================================"
+echo -e "${BLUE}Update this @ "container-monitoring/deviceDetails.toml"${RESET}"
+echo -e "${BOLD}JUST MAKE NOTE OF THE IP in a Book for now, and later, manually, add to the Device Details${r}"
+echo "======================================================================="
+echo -e "${BOLD}[MAKE NOTE OF:- DEVICE NAME, IP, PASS]${RESET}"
+echo -e "${GREEN}${BOLD}[REMOTE CONFIGURATION COMPLETE]${RESET}"

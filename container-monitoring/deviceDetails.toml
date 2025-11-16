@@ -1,0 +1,11 @@
+# This is where I will be adding all the devices
+# Refer to the DATA-FLOW diagram to understand importance of this file
+# NOTE:- We require STATIC IPs along with Password, for healing them by SSHing into the device.
+
+
+[[device]]
+name="Device1"
+ip="10.10.3.189"
+pass="spit@123"
+
+# and so on. . . . 
