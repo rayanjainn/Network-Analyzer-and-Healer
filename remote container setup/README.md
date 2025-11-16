@@ -1,22 +1,26 @@
-# CONTAINER-METRICS
 
-The following directory should be used on the PCs (aka, LXCs) whose metrics I want to import on my rsyslog server.
+# CONTAINER MONITORING [@RSYSLOG SERVER]
 
-Running the `remoteConfig.sh` will do the following things:
-- Download and Setup the rsyslog to send the logs *(by making and editing the rsyslog server's IP over there)*
-- Run the container of `nodeexporter` which enables the FETCH of system metrics by some other device *(here, our prometheus on syslog server)*
+> **⚠️THE FOLLOWING DOCKER COMPOSE AND ALL IS NEEDED FOR THE RSYSLOG SERVER ONLY-NOWHERE ELSE!**
 
-**Alright, to RUN THE SCRIPT, do this:-**
-```bash
-cd "remote container setup"         # this directory
-chmod +x remoteConfig.sh
-
-# replace the IP below with the actual IP of the Rsyslog Server
-./remoteConfig.sh --<IP_OF_SYSLOG_SERVER> 
+Well, I have made some changes in the file structure and the whole flow of how the things will work-so yes, these are the changes of the refactor
+```txt
+container-monitoring
+	├── deviceDetails.toml
+	├── docker-compose.yml
+	├── makePrometheus.sh
+	├── prometheus.yml
+	├── prometheus_template.yml
+	└── README.md
 ```
+Follow the **FLOW** mentioned below to setup things properly:-
+1. We first clone the repo on each and every **REMOTE DEVICE** and there, we run the `remote container setup/remoteConfig.sh` file, and once that setup is done, we note these three things per device *(be it LXC or a real Computer - and without running script, we need the same things for Network Nodes)* - 
+`Device Name : Static IP : Password`
+2. Once we have done `1` for all the devices, we then head to this directory, and add the data in the `deviceDetails.toml`. The reason I am going with `.toml` is that its better than `.json` and can be easily understood.
+3. After adding the things to toml, we run the script that will automatically make the `prometheus.yml`, that is, we run `./makePrometheus.sh`
+4. Running the script, `prometheus.yml` will be created, and it will have all the device's services under jobs *(like, for every device, there will be two jobs- nodeExporter and cAdvisor)*.
+5. With `.yml` made, we run the command `sudo docker compose up -d`. This will run the compose command, and set up the things for us.
+6. With Prometheus and even the local cAdvisor running, we can check the same by hitting the `localhost:9090` for prometheus check. And within that, under the status, we can see, the connection status of all the devices with us.
 
-> The main aim of this file is to-
->(1) Send the Logs to the Rsyslog Server [thus, setting up 50-remote.conf]
->(2) Send the device metrics to the Rsyslog Server [using node-exporter]
->(3) Send the container metrics to the Rsyslog Server [using cAdvisor]
->(4) Open the SSH port for the device, so that, we can SSH to heal the device (if needed, we can open SSH for Rsyslog only) 
+
+> **Individual Device Metrics Check** - check whether you can hit their mentioned routes from your server *(by typing on the internet the PC's <IP:Port> which should show their NodeExporter page, and even a route `/metrics` or so will show the same)*. Also, check if your prometheus has added the jobs for scraping the things. If the page shows all the PCs u have in the yml, then, you are good to go, and add the things in the Grafana dashboards
