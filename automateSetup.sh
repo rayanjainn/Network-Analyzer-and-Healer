@@ -71,6 +71,18 @@ if \$fromhost-ip != "127.0.0.1" then {
 }
 EOF'
 
+echo -e "${BLUE}[Even Writing the Log Rotation Script - for zipping the previous logs]"
+sudo bash -c 'cat > /etc/logrotate.d/remote_logs <<EOF
+/var/log/remote/*.log {
+    monthly
+    rotate 6
+    compress
+    missingok
+    notifempty
+}
+EOF'
+echo -e "${BLUE}${BOLD}[CHECK =>  /etc/logrotate.d/remote_logs]"
+
 # Ensure rsyslog dir perms and restart
 sudo mkdir -p /var/log/remote
 sudo chown syslog:adm /var/log/remote
