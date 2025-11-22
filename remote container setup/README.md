@@ -16,6 +16,9 @@ container-monitoring
 Follow the **FLOW** mentioned below to setup things properly:-
 1. We first clone the repo on each and every **REMOTE DEVICE** and there, we run the `remote container setup/remoteConfig.sh` file, and once that setup is done, we note these three things per device *(be it LXC or a real Computer - and without running script, we need the same things for Network Nodes)* - 
 `Device Name : Static IP : Password`
+
+> **NOTE**: On successful running of the script, this part ends. We head out from the remote-device, and then, we configure the server with the steps given below. **THE BELOW STEPS ARE FOR SERVER SIDE ONLY, NOT FOR THE REMOTE-HOST SIDE**
+
 2. Once we have done `1` for all the devices, we then head to this directory, and add the data in the `deviceDetails.toml`. The reason I am going with `.toml` is that its better than `.json` and can be easily understood.
 3. After adding the things to toml, we run the script that will automatically make the `prometheus.yml`, that is, we run `./makePrometheus.sh`
 4. Running the script, `prometheus.yml` will be created, and it will have all the device's services under jobs *(like, for every device, there will be two jobs- nodeExporter and cAdvisor)*.

@@ -7,7 +7,7 @@ BLUE="\033[0;34m"
 BOLD="\033[1m"
 r="\033[0m"
 
-DEVICE_LIST="./deviceDetails.txt"
+DEVICE_LIST="./deviceDetails.toml"
 PROMETHEUS_TEMPLATE="./prometheus_template.yml"
 TARGET_FILE="./prometheus.yml"
 
