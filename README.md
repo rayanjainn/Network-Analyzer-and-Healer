@@ -34,7 +34,8 @@ The pipeline flow is:
 ---
 
 ## Repository Structure
-> This will be automated using the github actions workflow
+<!--REPO_TREE_START-->
+<!--REPO_TREE_END-->
 
 ## Setup Instructions
 

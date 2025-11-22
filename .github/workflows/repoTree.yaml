@@ -1,0 +1,43 @@
+name: Generate Tree View
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-tree:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install tree
+        run: sudo apt-get update && sudo apt-get install -y tree
+
+      - name: Update README with new tree
+        run: |
+          TREE_CONTENT="$(tree -I '.git|node_modules|docker-data|*.log' --noreport)"
+          awk -v tree="$TREE_CONTENT" '
+            /<!--REPO_TREE_START-->/ {
+              print;
+              print "```";
+              print tree;
+              print "```";
+              f=1; next
+            }
+            /<!--REPO_TREE_END-->/ {
+              f=0
+            }
+            !f
+          ' README.md > README.tmp
+          mv README.tmp README.md
+
+      - name: Commit updated README
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add README.md
+          git commit -m "Update README tree view" || echo "No changes to commit"
+          git push
