@@ -1,0 +1,99 @@
+# this is list of all the promql queries that will be used.
+# either you can copy from here, and paste on Grafana, or, you use the query-builder
+# so, these are highly user catered. Thus, ask your user what all things they wish to monitor
+# and based on that, search for the queries.
+
+
+# ==========================
+# SYSTEM STATS
+# ==========================
+
+# RAM RELATED
+100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))
+node_memory_MemAvailable_bytes / 1024^3
+
+# CPU RELATED
+100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+
+# DISK USED
+100 * (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} 
+            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}))
+
+# DISK READ
+rate(node_disk_reads_completed_total[5m])
+
+# DISK WRITE
+rate(node_disk_writes_completed_total[5m])
+
+
+# NETWORK READ
+rate(node_network_receive_bytes_total{device!~"lo"}[5m])
+
+# NETWORK WRITE
+rate(node_network_transmit_bytes_total{device!~"lo"}[5m])
+
+# NO. OF PROCESSES RUNNING
+node_processes_state{state="running"}
+#OR
+sum by (instance) (node_processes_state{state="running"})
+
+
+# NO. OF APPLICATIONS RUNNING
+sum(node_processes_state)
+
+# NO. OF SERVERS
+node_systemd_units{state="active"}
+count(node_systemd_units{state="active"})
+
+
+# NO. OF VMs
+count(node_processes_state{state="running", name=~"qemu.*"})
+
+# SYSTEM UPTIME
+node_time_seconds - node_boot_time_seconds
+
+
+# SYSTEM DOWNTIME
+absent_over_time(node_boot_time_seconds[1h])
+
+# LIST OF AVAILABLE CONNECTIVITY THINGS
+node_network_up
+node_network_up{device=~"eth0|wlan0|bluetooth"}
+
+# NUMBER OF LOGGED-IN USERS
+node_users_logged_in
+
+# NUMBER OF RUNNING USERS
+count(node_processes_state{state="running"} > 0)
+
+
+
+
+# ==========================
+# CONTAINER STATS
+# ==========================
+
+# NUMBER OF CONTAINERS RUNNING (use this, or the one that is used by the 893 wala imported dashboard)
+count(container_last_seen{image!=""} > 0)
+
+# PER CONTAINER CPU USAGE
+100 * rate(container_cpu_usage_seconds_total{id!=""}[5m])
+
+# TOP 5 CONTAINERS BY CPU USAGE
+topk(5, rate(container_cpu_usage_seconds_total{id!=""}[5m]))
+
+# % MEMOERY USED
+100 *
+(
+  container_memory_usage_bytes{id!=""} 
+  / container_spec_memory_limit_bytes{id!=""}
+)
+
+
+# PER CONTAINER NETWORK RECEIVE
+rate(container_network_receive_bytes_total{id!=""}[5m])
+
+# PER CONTAINER NETWORK TRANSMIT
+rate(container_network_transmit_bytes_total{id!=""}[5m])
+
