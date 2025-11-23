@@ -78,7 +78,7 @@ All executed entirely on-premise, without internet or cloud services.
 <!--REPO_TREE_END-->
 
 ## Setup Instructions
-> image goes here
+![setup flow](./images/setup_flow.png)
 Run the following commands on **Ubuntu**:
 
 ```bash
