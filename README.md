@@ -52,6 +52,7 @@ The pipeline flow is:
 │   ├── prometheus.yml
 │   ├── prometheus_template.yml
 │   └── queries.promql
+├── dashboard.json
 ├── docker
 │   └── docker-compose.yml
 ├── remote_container_setup
