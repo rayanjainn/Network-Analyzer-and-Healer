@@ -35,6 +35,34 @@ The pipeline flow is:
 
 ## Repository Structure
 <!--REPO_TREE_START-->
+```
+.
+├── LICENSE
+├── README.md
+├── automateSetup.sh
+├── config
+│   ├── loki-config.yaml
+│   ├── promtail-config.yaml
+│   └── rsyslog.conf
+├── container-monitoring
+│   ├── README.md
+│   ├── deviceDetails.toml
+│   ├── docker-compose.yml
+│   ├── makePrometheus.sh
+│   ├── prometheus.yml
+│   ├── prometheus_template.yml
+│   └── queries.promql
+├── docker
+│   └── docker-compose.yml
+├── remote_container_setup
+│   ├── README.md
+│   ├── remoteConfig.sh
+│   └── remoteShutdown.sh
+├── restart.sh
+└── scripts
+    ├── ubuntu-rsyslog-setup.sh
+    └── validate-install.sh
+```
 <!--REPO_TREE_END-->
 
 ## Setup Instructions
