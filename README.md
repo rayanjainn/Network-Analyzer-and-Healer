@@ -18,18 +18,7 @@ This repository automates an **on-premise observability and log aggregation pipe
 ---
 
 ## Architecture Overview
-
-```
-+-------------------+       +-------------------+       +------------------+       +-----------------+
-|  System Logs      |       |   Promtail Agent  |       |      Loki        |       |    Grafana      |
-|  (via Rsyslog)    +------>+   (Dockerized)    +------>+  (Dockerized)    +------>+  (Dockerized)   |
-+-------------------+       +-------------------+       +------------------+       +-----------------+
-        |                           |                         |                         |
-        |------ Ubuntu Host --------|-------------------------|-------------------------|
-```
-
-The pipeline flow is:
-**System Logs → Rsyslog → Promtail → Loki → Grafana**
+![base flow diagram](./images/image.png)
 
 ---
 
