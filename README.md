@@ -4,21 +4,41 @@
 ![Version](https://img.shields.io/github/v/tag/Th3C0d3Mast3r/Network-Analyzer-and-Healer?label=VERSION&color=brightgreen&logo=git)
 
 # Network Analyzer & Healer  
-### Rsyslog → Promtail → Loki → Grafana Stack
+- **Centralized log aggregation** :- Rsyslog → Promtail → Loki
+    
+- **Host and container metrics** :- Node Exporter & cAdvisor → Prometheus
 
-This repository automates an **on-premise observability and log aggregation pipeline** using:
+- **Unified dashboards** :- Grafana for visualizing logs and metrics together
 
-- **Rsyslog** — system log collector (host)
-- **Promtail** — log shipper that reads logs from files and forwards to Loki
-- **Loki** — log aggregation backend
-- **Grafana** — visualization and analysis dashboard
-
-> The above is the analyzer part-healer stack will be added soon
+- **Automated healing**
+  - Shell scripts triggered based on alert conditions
+  - Execution over SSH to remote systems
+  - Helps auto-correct failures such as high CPU usage, service crashes, insufficient memory, and more
 
 ---
 
 ## Architecture Overview
 ![base flow diagram](./images/image.png)
+
+## Remote Device
+- Backed by rsyslog, node-exporter, and cAdvisor
+- Collects system logs and performance data
+- Sends everything to the monitoring server
+
+## Central Monitoring Server
+- Promtail receives logs and writes them to Loki
+- Prometheus scrapes performance and container metrics
+- Grafana visualizes all collected data
+- Alert triggers can remotely execute healing scripts to fix system issues on the remote machines
+
+This forms a complete end-to-end automated loop:
+
+1. **Monitor**
+2. **Detect**
+3. **Alert**
+4. **Auto-Heal**
+
+All executed entirely on-premise, without internet or cloud services.
 
 ---
 
@@ -58,7 +78,7 @@ This repository automates an **on-premise observability and log aggregation pipe
 <!--REPO_TREE_END-->
 
 ## Setup Instructions
-
+> image goes here
 Run the following commands on **Ubuntu**:
 
 ```bash
@@ -66,16 +86,33 @@ Run the following commands on **Ubuntu**:
 git clone <repo-url>
 cd Network-Analyzer-and-Healer
 
-# Make automation scripts executable
-chmod +x scripts/*.sh
-chmod +x ./automateSetup.sh
-chmod +x ./restart.sh
+# FOR CLIENT SIDE (REMOTE DEVICES)
+./remoteConfig.sh
 
-# Run the automated setup
+# FOR SERVER SIDE (CENTRAL MONITORING SYSTEM)
 ./automateSetup.sh
 
-# In case there is some problem in the intermediate steps, then, run the following command
+# in case some problem happens, and exits without proper setup, run this, and then resolve
 ./restart.sh
+
+cd container-monitoring
+
+# Update your monitoring list:
+# Edit deviceDetails.toml and add:
+# IP = ""
+# NAME = ""
+# PASS = ""
+./makePrometheus.sh
+
+# Start monitoring stack
+sudo docker compose up -d
+
+# Validate Prometheus scraping targets
+# Navigate to http://prometheus:9090 and check under "Targets"
+# Remote systems should be visible as healthy
+
+# Then open Grafana (http://localhost:3000)
+# and add data sources for both Loki and Prometheus
 ```
 
 The script will:
@@ -94,34 +131,24 @@ After installation:
 ./scripts/validate-install.sh
 ```
 
-Expected:
-- Rsyslog service active  
-- Loki and Promtail running (`docker ps`)  
-- Grafana accessible at: **http://localhost:3000**
+## Expected Result
+- Rsyslog service active and forwarding logs
+- Promtail and Loki running (docker ps)
+- Prometheus scraping remote node-exporter and cAdvisor targets
+- Grafana accessible at: `http://localhost:3000`
 
-Default Grafana credentials:
-- **Username:** admin  
-- **Password:** admin
-
----
+## Default Grafana credentials
+- `Username`: admin
+- `Password`: admin
 
 ## Viewing Logs
+- Open Grafana: `http://localhost:3000`
+- Add Loki as a Data Source:
+    - URL: `http://loki:3100`
+- Add Prometheus as a Data Source:
+    - URL: `http://prometheus:9090`
 
-1. Open **Grafana** at `http://localhost:3000`
-2. Add **Loki** as a data source:
-   - URL: `http://loki:3100`
-3. Explore logs via:
-   - *Explore → Log labels → host, process, severity*
-
----
-
-## Troubleshooting
-
-| Issue | Possible Cause | Fix |
-|-------|----------------|-----|
-| Grafana not loading | Container not up | `docker-compose up -d` |
-| Logs missing | Promtail config path issue | Check `/var/log/syslog` and `promtail-config.yaml` |
-| Rsyslog not sending | UDP/TCP port blocked | `sudo ufw allow 514/tcp` |
+> Once done, then import the pre-made dashboard template that you can find in the repository, that is, under the name of `dashboard.json`. Import that, and you will be mostly good to go.
 
 ---
 
@@ -131,6 +158,12 @@ Default Grafana credentials:
 | v1.0.0  | 1st November, 2025  | Automated Setup of the whole Project, with Log aggregation | `COMPLETED` |
 | v1.0.1  | TBA  | Adding Basic Log interpretation, and base recovery queries | `IN-PROGRESS` |
 | v2.0.0  | TBA  | Fulling running Repository | `TO-DO` |
+
+---
+
+## Troubleshooting
+> will be added here soon
+---
 
 ## License
 
