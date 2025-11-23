@@ -65,7 +65,8 @@ All executed entirely on-premise, without internet or cloud services.
 ├── docker
 │   └── docker-compose.yml
 ├── images
-│   └── image.png
+│   ├── image.png
+│   └── setup_flow.png
 ├── remote_container_setup
 │   ├── README.md
 │   ├── remoteConfig.sh
