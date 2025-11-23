@@ -44,6 +44,8 @@ This repository automates an **on-premise observability and log aggregation pipe
 ├── dashboard.json
 ├── docker
 │   └── docker-compose.yml
+├── images
+│   └── image.png
 ├── remote_container_setup
 │   ├── README.md
 │   ├── remoteConfig.sh
