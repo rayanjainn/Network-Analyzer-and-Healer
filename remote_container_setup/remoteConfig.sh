@@ -111,10 +111,18 @@ fi
 # sudo systemctl start monitoring-containers.service
 
 echo -e "${BOLD}INITIATING DOWNLOAD FOR NODE-EXPORTER...${RESET}"
-sudo docker run -d \
-  --net="host" \
-  --pid="host" \
-  -v "/:/host:ro,rslave" \
+# sudo docker run -d \
+#   --net="host" \
+#   --pid="host" \
+#   -v "/:/host:ro,rslave" \
+#   quay.io/prometheus/node-exporter:latest \
+#   --path.rootfs=/host
+
+docker run -d \
+  --name=node-exporter \
+  --net=host \
+  --pid=host \
+  -v "/:/host:ro" \
   quay.io/prometheus/node-exporter:latest \
   --path.rootfs=/host
 
@@ -124,16 +132,28 @@ echo -e "${GREEN}${BOLD}[NODE-EXPORTER SETUP COMPLETE]${RESET}"
 echo -e "${BOLD}INITIATING DOWNLOAD FOR CADVISOR...${RESET}"
 
 # Pull and run cAdvisor container
-sudo docker run -d \
+# sudo docker run -d \
+#   --name=cadvisor \
+#   --volume=/:/rootfs:ro \
+#   --volume=/var/run:/var/run:ro \
+#   --volume=/sys:/sys:ro \
+#   --volume=/var/lib/docker/:/var/lib/docker:ro \
+#   --publish=8080:8080 \
+#   --detach=true \
+#   --restart=always \
+#   google/cadvisor:latest
+
+docker run -d \
   --name=cadvisor \
+  --privileged \
   --volume=/:/rootfs:ro \
   --volume=/var/run:/var/run:ro \
   --volume=/sys:/sys:ro \
   --volume=/var/lib/docker/:/var/lib/docker:ro \
   --publish=8080:8080 \
-  --detach=true \
   --restart=always \
-  google/cadvisor:latest
+  gcr.io/cadvisor/cadvisor:latest
+
 
 echo -e "${GREEN}${BOLD}[CADVISOR SETUP COMPLETE]${RESET}"
 echo -e "${BOLD}SETTING UP SSH FOR REMOTE ACCESS...${RESET}"
