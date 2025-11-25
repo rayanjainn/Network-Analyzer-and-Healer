@@ -73,6 +73,7 @@ All executed entirely on-premise, without internet or cloud services.
 ├── docker
 │   └── docker-compose.yml
 ├── images
+│   ├── healing framework.png
 │   ├── image.png
 │   └── setup_flow.png
 ├── remote_container_setup
