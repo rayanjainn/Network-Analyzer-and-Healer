@@ -1,180 +1,155 @@
 #!/bin/bash
 
-if [ -z "$1" ];then
+# ==========================================================
+#  FINAL DEVICE MONITORING SETUP SCRIPT
+#  - Removes snap docker (incompatible with monitoring)
+#  - Installs real Docker CE
+#  - Installs rsyslog remote logging
+#  - Starts node-exporter + cAdvisor correctly
+# ==========================================================
+
+if [ -z "$1" ]; then
     echo "Usage: $0 --<RSYSLOG_SERVER_IP>"
     exit 1
 fi
 
 RSYSLOG_IP="${1#--}"
 
-# this will start the node-exporter on your DEVICE along with sending the rsyslog to the rsyslog server
-
+# Colors
 GREEN='\033[0;32m'
 RESET='\033[0m'
 BOLD='\033[1m'
 YELLOW='\033[1;33m'
 BLUE="\033[0;34m"
 
-echo -e "${YELLOW}${BOLD}[UPDATING APT REPOSITORIES]${RESET}"
+echo -e "${YELLOW}${BOLD}[UPDATING APT]${RESET}"
 sudo apt update -y
 
-# setup rsyslog download first
-echo -e "${YELLOW}[SETTING UP RSYSLOG FOR REMOTE LOGGING]${RESET}"
+# ==========================================================
+#  REMOVE SNAP DOCKER (MOST IMPORTANT FIX)
+# ==========================================================
+echo -e "${YELLOW}${BOLD}[CHECKING FOR SNAP DOCKER]${RESET}"
+
+if snap list | grep -q docker; then
+    echo -e "${BLUE}Snap Docker detected → removing (this fixes mount errors)...${RESET}"
+    sudo snap remove docker
+fi
+
+if dpkg -l | grep -q docker.io; then
+    echo -e "${BLUE}Removing conflicting docker.io package...${RESET}"
+    sudo apt purge -y docker.io docker-doc docker-compose docker-compose-v2 containerd runc || true
+fi
+
+sudo rm -rf /var/snap/docker || true
+
+# ==========================================================
+#  INSTALL REAL DOCKER CE
+# ==========================================================
+echo -e "${YELLOW}${BOLD}[INSTALLING REAL DOCKER CE]${RESET}"
+
+if ! command -v docker &>/dev/null; then
+    sudo apt update -y
+    sudo apt install -y ca-certificates curl gnupg lsb-release
+
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+        sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
+
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] \
+      https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    sudo apt update -y
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+    sudo systemctl enable docker
+    sudo systemctl start docker
+
+    echo -e "${GREEN}${BOLD}[Docker CE Installed Successfully]${RESET}"
+
+else
+    echo -e "${BLUE}${BOLD}[Docker Already Installed]${RESET}"
+fi
+
+# ==========================================================
+#  SETUP RSYSLOG
+# ==========================================================
+echo -e "${YELLOW}${BOLD}[SETTING UP RSYSLOG]${RESET}"
+
 sudo apt install -y rsyslog
 
-# Enable and start rsyslog
-echo -e "${BOLD}Enabling and restarting rsyslog...${RESET}"
-sudo systemctl enable rsyslog
-sudo systemctl restart rsyslog
-sleep 2
-sudo systemctl status rsyslog --no-pager||true
-
-# now, we wish to add the 50-remote.conf in /etc/rsyslog.d/
-echo -e "${YELLOW}[ADDING REMOTE RSYSLOG CONFIGURATION]${RESET}"
-
-# ===== MODIFIED: Insert actual IP instead of placeholder =====
 sudo bash -c "cat << EOF > /etc/rsyslog.d/50-remote.conf
 *.* @@${RSYSLOG_IP}
 EOF"
 
+sudo systemctl enable rsyslog
 sudo systemctl restart rsyslog
-echo -e "${GREEN}${BOLD}[RSYSLOG CONFIGURATION ADDED]${RESET}"
 
-echo -e "${YELLOW}[CHECKING DOCKER INSTALLATION]${RESET}"
+echo -e "${GREEN}${BOLD}[RSYSLOG CONFIGURED]${RESET}"
 
-# Proceed only if Docker is not installed
-if ! command -v docker&>/dev/null;then
+# ==========================================================
+#  REMOVE OLD CONTAINERS IF THEY EXIST
+# ==========================================================
+docker rm -f node-exporter &>/dev/null || true
+docker rm -f cadvisor &>/dev/null || true
 
-    # Install Docker (official repo) and docker compose plugin
-    echo -e "${YELLOW}[INSTALLING DOCKER]${RESET} - along with Docker Compose Plugin..."
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg|sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"|sudo tee /etc/apt/sources.list.d/docker.list>/dev/null
-    sudo apt update -y
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-    # Add current user to docker group (non-blocking)
-    if ! groups $USER|grep -q '\bdocker\b';then
-        echo "Adding $USER to docker group (you may need to re-login for group changes)..."
-        sudo usermod -aG docker $USER||true
-    fi
-
-    echo -e "${GREEN}[SUCCESS] - Docker Installed${RESET}"
-
-else
-    echo -e "${BLUE}${BOLD}[SKIPPED] - Docker already installed on this system.${RESET}"
-fi
-
-# sudo bash -c "cat << 'EOF' > /etc/systemd/system/monitoring-containers.service
-# [Unit]
-# Description=Start Node Exporter and cAdvisor containers
-# After=network.target docker.service
-# Requires=docker.service
-
-# [Service]
-# Type=oneshot
-# RemainAfterExit=yes
-
-# # Remove old containers (if exist)
-# ExecStartPre=/usr/bin/docker rm -f monitoring-node-exporter 2>/dev/null || true
-# ExecStartPre=/usr/bin/docker rm -f monitoring-cadvisor 2>/dev/null || true
-
-# # Start Node Exporter container
-# ExecStart=/usr/bin/docker run -d \
-#   --name=monitoring-node-exporter \
-#   --net=host \
-#   --pid=host \
-#   -v /:/host:ro,rslave \
-#   quay.io/prometheus/node-exporter:latest \
-#   --path.rootfs=/host
-
-# # Start cAdvisor container
-# ExecStart=/usr/bin/docker run -d \
-#   --name=monitoring-cadvisor \
-#   --volume=/:/rootfs:ro \
-#   --volume=/var/run:/var/run:ro \
-#   --volume=/sys:/sys:ro \
-#   --volume=/var/lib/docker/:/var/lib/docker:ro \
-#   --publish=8080:8080 \
-#   --restart=always \
-#   google/cadvisor:latest
-
-# # Stop containers cleanly
-# ExecStop=/usr/bin/docker stop monitoring-node-exporter monitoring-cadvisor || true
-# ExecStop=/usr/bin/docker rm monitoring-node-exporter monitoring-cadvisor || true
-
-# [Install]
-# WantedBy=multi-user.target
-# EOF"
-
-# sudo systemctl daemon-reload
-# sudo systemctl enable monitoring-containers.service
-# sudo systemctl start monitoring-containers.service
-
-echo -e "${BOLD}INITIATING DOWNLOAD FOR NODE-EXPORTER...${RESET}"
-# sudo docker run -d \
-#   --net="host" \
-#   --pid="host" \
-#   -v "/:/host:ro,rslave" \
-#   quay.io/prometheus/node-exporter:latest \
-#   --path.rootfs=/host
+# ==========================================================
+#  START NODE EXPORTER (CORRECT HOST MOUNTS)
+# ==========================================================
+echo -e "${YELLOW}${BOLD}[STARTING NODE EXPORTER]${RESET}"
 
 docker run -d \
   --name=node-exporter \
   --net=host \
   --pid=host \
-  -v "/:/host:ro" \
+  -v "/proc:/host/proc:ro" \
+  -v "/sys:/host/sys:ro" \
+  -v "/:/host:ro,rslave" \
   quay.io/prometheus/node-exporter:latest \
+  --path.procfs=/host/proc \
+  --path.sysfs=/host/sys \
   --path.rootfs=/host
 
-echo -e "${GREEN}${BOLD}[NODE-EXPORTER SETUP COMPLETE]${RESET}"
+echo -e "${GREEN}${BOLD}[NODE EXPORTER RUNNING]${RESET}"
 
-# NOW, WE DOWNLOAD FOR cAdvisor (in case there are containers running on the Device)
-echo -e "${BOLD}INITIATING DOWNLOAD FOR CADVISOR...${RESET}"
-
-# Pull and run cAdvisor container
-# sudo docker run -d \
-#   --name=cadvisor \
-#   --volume=/:/rootfs:ro \
-#   --volume=/var/run:/var/run:ro \
-#   --volume=/sys:/sys:ro \
-#   --volume=/var/lib/docker/:/var/lib/docker:ro \
-#   --publish=8080:8080 \
-#   --detach=true \
-#   --restart=always \
-#   google/cadvisor:latest
+# ==========================================================
+#  START CADVISOR (REAL WORKING VERSION)
+# ==========================================================
+echo -e "${YELLOW}${BOLD}[STARTING CADVISOR]${RESET}"
 
 docker run -d \
   --name=cadvisor \
-  --privileged \
   --volume=/:/rootfs:ro \
   --volume=/var/run:/var/run:ro \
   --volume=/sys:/sys:ro \
+  --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
   --volume=/var/lib/docker/:/var/lib/docker:ro \
+  --volume=/dev/disk/:/dev/disk:ro \
   --publish=8080:8080 \
   --restart=always \
-  gcr.io/cadvisor/cadvisor:latest
+  gcr.io/cadvisor/cadvisor:v0.49.1 \
+  --disable_metrics=accelerator
 
+echo -e "${GREEN}${BOLD}[CADVISOR RUNNING]${RESET}"
 
-echo -e "${GREEN}${BOLD}[CADVISOR SETUP COMPLETE]${RESET}"
-echo -e "${BOLD}SETTING UP SSH FOR REMOTE ACCESS...${RESET}"
-
-sudo apt install -y openssh-server
-sudo systemctl enable ssh
+# ==========================================================
+#  SSH ENABLE
+# ==========================================================
+echo -e "${YELLOW}${BOLD}[INSTALLING SSH SERVER]${RESET}"
 
 sudo apt install -y openssh-server
 sudo systemctl enable ssh
 sudo systemctl restart ssh
-sudo systemctl status ssh --no-pager || true
 
+# ==========================================================
+#  OUTPUT
+# ==========================================================
 PC_NAME=$(hostname)
 IP_ADDR=$(hostname -I | awk '{print $1}')
+
 echo "======================================================================"
-echo -e "${BOLD}ADD THE FOLLOWING TO THE TOML FILE WHICH WILL THEN BE USED TO CONFIGURE PROMETHEUS:${RESET}\n"
-echo -e "\n${PC_NAME}_cAdvisor =====> ${IP_ADDR}:8080"
-echo -e "${PC_NAME}_NodeExport ===> ${IP_ADDR}:9100"
+echo -e "${BOLD}ADD TO PROMETHEUS CONFIG:${RESET}\n"
+echo -e "${PC_NAME}_NodeExporter ==> ${IP_ADDR}:9100"
+echo -e "${PC_NAME}_cAdvisor     ==> ${IP_ADDR}:8080"
 echo "======================================================================"
-echo -e "${BLUE}Update this @ "container-monitoring/deviceDetails.toml"${RESET}"
-echo -e "${BOLD}JUST MAKE NOTE OF THE IP in a Book for now, and later, manually, add to the Device Details${r}"
-echo "======================================================================="
-echo -e "${BOLD}[MAKE NOTE OF:- DEVICE NAME, IP, PASS]${RESET}"
-echo -e "${GREEN}${BOLD}[REMOTE CONFIGURATION COMPLETE]${RESET}"
+echo -e "${GREEN}${BOLD}[SETUP COMPLETE – Monitoring Containers Running]${RESET}"
