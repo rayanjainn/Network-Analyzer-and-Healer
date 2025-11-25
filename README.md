@@ -18,8 +18,16 @@
 ---
 
 ## Architecture Overview
+
+### OVERALL FLOW AND THINGS WORKING
+![setup flow](./images/setup_flow.png)
+
+### TOP VIEW DATA FLOW DIAGRAM
 ![base flow diagram](./images/image.png)
 
+### HEALING FRAMEWORK
+![healing framework diagram](./images/healing%20framework.png)
+</br>
 ## Remote Device
 - Backed by rsyslog, node-exporter, and cAdvisor
 - Collects system logs and performance data
@@ -79,7 +87,6 @@ All executed entirely on-premise, without internet or cloud services.
 <!--REPO_TREE_END-->
 
 ## Setup Instructions
-![setup flow](./images/setup_flow.png)
 Run the following commands on **Ubuntu**:
 
 ```bash
