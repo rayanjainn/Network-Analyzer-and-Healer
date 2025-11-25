@@ -127,7 +127,7 @@ All executed entirely on-premise, without internet or cloud services.
 --- 
 
 ## Setup Instructions
-Run the following commands on **Ubuntu**:
+Run the following commands on **Ubuntu** *[to know what to after what, refer the comments below-and if still some issue, refer the diagram above to understand the flow]*
 
 ```bash
 # Clone the repository
