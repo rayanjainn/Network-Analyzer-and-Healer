@@ -117,18 +117,21 @@ echo -e "${GREEN}${BOLD}[NODE EXPORTER RUNNING]${RESET}"
 # ==========================================================
 echo -e "${YELLOW}${BOLD}[STARTING CADVISOR]${RESET}"
 
+
 docker run -d \
   --name=cadvisor \
-  --volume=/:/rootfs:ro \
-  --volume=/var/run:/var/run:ro \
-  --volume=/sys:/sys:ro \
-  --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
-  --volume=/var/lib/docker/:/var/lib/docker:ro \
-  --volume=/dev/disk/:/dev/disk:ro \
-  --publish=8080:8080 \
+  --privileged \
+  -p 8080:8080 \
+  -v /:/rootfs:ro \
+  -v /var/run:/var/run:rw \
+  -v /sys:/sys:ro \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+  -v /var/lib/docker/:/var/lib/docker:ro \
+  -v /dev/disk/:/dev/disk:ro \
   --restart=always \
   gcr.io/cadvisor/cadvisor:v0.49.1 \
-  --disable_metrics=accelerator
+  --docker_only
+
 
 echo -e "${GREEN}${BOLD}[CADVISOR RUNNING]${RESET}"
 
