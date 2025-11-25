@@ -64,52 +64,82 @@ else
     echo -e "${BLUE}${BOLD}[SKIPPED] - Docker already installed on this system.${RESET}"
 fi
 
-sudo bash -c "cat << 'EOF' > /etc/systemd/system/monitoring-containers.service
-[Unit]
-Description=Start Node Exporter and cAdvisor containers
-After=network.target docker.service
-Requires=docker.service
+# sudo bash -c "cat << 'EOF' > /etc/systemd/system/monitoring-containers.service
+# [Unit]
+# Description=Start Node Exporter and cAdvisor containers
+# After=network.target docker.service
+# Requires=docker.service
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
+# [Service]
+# Type=oneshot
+# RemainAfterExit=yes
 
-# Remove old containers (if exist)
-ExecStartPre=/usr/bin/docker rm -f monitoring-node-exporter 2>/dev/null || true
-ExecStartPre=/usr/bin/docker rm -f monitoring-cadvisor 2>/dev/null || true
+# # Remove old containers (if exist)
+# ExecStartPre=/usr/bin/docker rm -f monitoring-node-exporter 2>/dev/null || true
+# ExecStartPre=/usr/bin/docker rm -f monitoring-cadvisor 2>/dev/null || true
 
-# Start Node Exporter container
-ExecStart=/usr/bin/docker run -d \
-  --name=monitoring-node-exporter \
-  --net=host \
-  --pid=host \
-  -v /:/host:ro,rslave \
+# # Start Node Exporter container
+# ExecStart=/usr/bin/docker run -d \
+#   --name=monitoring-node-exporter \
+#   --net=host \
+#   --pid=host \
+#   -v /:/host:ro,rslave \
+#   quay.io/prometheus/node-exporter:latest \
+#   --path.rootfs=/host
+
+# # Start cAdvisor container
+# ExecStart=/usr/bin/docker run -d \
+#   --name=monitoring-cadvisor \
+#   --volume=/:/rootfs:ro \
+#   --volume=/var/run:/var/run:ro \
+#   --volume=/sys:/sys:ro \
+#   --volume=/var/lib/docker/:/var/lib/docker:ro \
+#   --publish=8080:8080 \
+#   --restart=always \
+#   google/cadvisor:latest
+
+# # Stop containers cleanly
+# ExecStop=/usr/bin/docker stop monitoring-node-exporter monitoring-cadvisor || true
+# ExecStop=/usr/bin/docker rm monitoring-node-exporter monitoring-cadvisor || true
+
+# [Install]
+# WantedBy=multi-user.target
+# EOF"
+
+# sudo systemctl daemon-reload
+# sudo systemctl enable monitoring-containers.service
+# sudo systemctl start monitoring-containers.service
+
+echo -e "${BOLD}INITIATING DOWNLOAD FOR NODE-EXPORTER...${RESET}"
+sudo docker run -d \
+  --net="host" \
+  --pid="host" \
+  -v "/:/host:ro,rslave" \
   quay.io/prometheus/node-exporter:latest \
   --path.rootfs=/host
 
-# Start cAdvisor container
-ExecStart=/usr/bin/docker run -d \
-  --name=monitoring-cadvisor \
+echo -e "${GREEN}${BOLD}[NODE-EXPORTER SETUP COMPLETE]${RESET}"
+
+# NOW, WE DOWNLOAD FOR cAdvisor (in case there are containers running on the Device)
+echo -e "${BOLD}INITIATING DOWNLOAD FOR CADVISOR...${RESET}"
+
+# Pull and run cAdvisor container
+sudo docker run -d \
+  --name=cadvisor \
   --volume=/:/rootfs:ro \
   --volume=/var/run:/var/run:ro \
   --volume=/sys:/sys:ro \
   --volume=/var/lib/docker/:/var/lib/docker:ro \
   --publish=8080:8080 \
+  --detach=true \
   --restart=always \
   google/cadvisor:latest
 
-# Stop containers cleanly
-ExecStop=/usr/bin/docker stop monitoring-node-exporter monitoring-cadvisor || true
-ExecStop=/usr/bin/docker rm monitoring-node-exporter monitoring-cadvisor || true
+echo -e "${GREEN}${BOLD}[CADVISOR SETUP COMPLETE]${RESET}"
+echo -e "${BOLD}SETTING UP SSH FOR REMOTE ACCESS...${RESET}"
 
-[Install]
-WantedBy=multi-user.target
-EOF"
-
-sudo systemctl daemon-reload
-sudo systemctl enable monitoring-containers.service
-sudo systemctl start monitoring-containers.service
-
+sudo apt install -y openssh-server
+sudo systemctl enable ssh
 
 sudo apt install -y openssh-server
 sudo systemctl enable ssh
