@@ -18,14 +18,14 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -76,10 +76,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_network_up{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_network_up{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -216,7 +216,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -264,10 +264,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "go_threads{job=\"secondDevice_NodeExport\"}",
+          "expr": "go_threads{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -278,7 +278,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -355,10 +355,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "code",
-          "expr": "100 * (\n  (node_memory_MemTotal_bytes{job=\"secondDevice_NodeExport\"} - node_memory_MemAvailable_bytes{job=\"secondDevice_NodeExport\"})\n  / node_memory_MemTotal_bytes{job=\"secondDevice_NodeExport\"}\n)",
+          "expr": "100 * (\n  (node_memory_MemTotal_bytes{job=\"Device1_NodeExport\"} - node_memory_MemAvailable_bytes{job=\"Device1_NodeExport\"})\n  / node_memory_MemTotal_bytes{job=\"Device1_NodeExport\"}\n)",
           "range": true,
           "refId": "A"
         }
@@ -369,7 +369,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -417,10 +417,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_load1{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_load1{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -431,8 +431,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
+      "description": "node_hwmon_temp_celsius",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -482,21 +483,22 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_hwmon_temp_celsius{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_hwmon_temp_celsius{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Temperature Visualizer",
+      "transparent": true,
       "type": "bargauge"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -573,10 +575,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_boot_time_seconds{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_boot_time_seconds{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -587,8 +589,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
+      "description": "node_network_receive_bytes_ (all u want)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -601,14 +604,14 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 0,
+            "fillOpacity": 25,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "smooth",
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -618,7 +621,7 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "none"
+              "mode": "normal"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -629,7 +632,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -663,22 +667,20 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_network_receive_bytes_total{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_network_receive_bytes_total{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_network_transmit_bytes_total{job=\"secondDevice_NodeExport\"}",
-          "hide": false,
-          "instant": false,
+          "expr": "node_network_transmit_bytes_total{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "B"
         }
@@ -690,8 +692,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
+      "description": "node_dmi_info",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -732,7 +735,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -766,10 +770,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_dmi_info{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_dmi_info{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -781,8 +785,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
+      "description": "node_cpu_seconds_total",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -823,7 +828,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -858,10 +864,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_cpu_seconds_total{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_cpu_seconds_total{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -873,8 +879,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
+      "description": "node_filesystem_free_bytes",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -926,22 +933,24 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_filesystem_free_bytes{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_filesystem_free_bytes{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Free Bytes in Filesystem",
+      "transparent": true,
       "type": "piechart"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
+      "description": "node_vmstat_oom_kill",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -982,7 +991,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1016,10 +1026,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_vmstat_oom_kill{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_vmstat_oom_kill{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -1031,8 +1041,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
+      "description": "node_memory_MemFree_bytes",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1073,7 +1084,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1107,15 +1119,16 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_memory_MemFree_bytes{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_memory_MemFree_bytes{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Free Memory",
+      "transparent": true,
       "type": "timeseries"
     },
     {
@@ -1164,7 +1177,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1282,7 +1296,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1330,7 +1345,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -1372,7 +1387,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1406,10 +1422,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "node_network_flags{job=\"secondDevice_NodeExport\"}",
+          "expr": "node_network_flags{job=\"Device1_NodeExport\"}",
           "range": true,
           "refId": "A"
         }
@@ -1438,7 +1454,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1527,7 +1544,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -1569,7 +1586,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1604,10 +1622,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "container_cpu_load_average_10s{job=\"secondDevice_cAdvisor\"}",
+          "expr": "container_cpu_load_average_10s{job=\"Device1_cAdvisor\"}",
           "range": true,
           "refId": "A"
         }
@@ -1618,7 +1636,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+        "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
       },
       "fieldConfig": {
         "defaults": {
@@ -1660,7 +1678,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1695,10 +1714,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f65d0cff-1e80-4194-8146-881c59a95ae0"
+            "uid": "e7561296-2324-48cc-bdd3-de27cdcd5bde"
           },
           "editorMode": "builder",
-          "expr": "container_cpu_usage_seconds_total{job=\"secondDevice_cAdvisor\"}",
+          "expr": "container_cpu_usage_seconds_total{job=\"cadvisor\"}",
           "range": true,
           "refId": "A"
         }
@@ -1710,7 +1729,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "bc22c411-fbd6-43ef-a283-536c3ff302dc"
+        "uid": "d0845677-1d30-4566-bb1d-280a313e5e7d"
       },
       "gridPos": {
         "h": 7,
@@ -1736,7 +1755,7 @@
             "uid": "bc22c411-fbd6-43ef-a283-536c3ff302dc"
           },
           "editorMode": "builder",
-          "expr": "{filename=\"/var/log/remote/psipl-OptiPlex-SFF-7010.log\"} |= ``",
+          "expr": "{filename=\"/var/log/remote/psipl-HP-280-G3-SFF-Business-PC.log\"} |= ``",
           "queryType": "range",
           "refId": "A"
         }
@@ -1754,7 +1773,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
