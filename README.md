@@ -216,7 +216,13 @@ The script will:
 ---
 
 ## Troubleshooting
-> will be added here soon
+|             PROBLEM            |    WHAT IT MEANS   |   HOW TO RESOLVE  |
+|--------------------------------|--------------------|-------------------|
+| IP Table Problem               | The problem comes that, the IP tables mismatch, and thus, the `automateSetup.sh` doesnt work | For the same, we flush the existing ip tables, and then, get the legacy one |
+| rsyslog not working            | The container is unable to send the data to the rsyslog server | Try `sudo systemctl restart rsyslog` and then, check the status for the same. Try other rsyslog resolving scripts as well, and ensure the same IP is used, and both are on the SAME LAN! |
+| Docker wont match as installed using SNAP | If you download docker using snap (like loosers), then, this is a problem | To resolve the same, remove the snap version based docker, and download the one using apt, and ce/cli one. |
+
+For more quereis/problems, please feel free to make `issue` -  we will be actively reviewing, and updating the troubleshooting section for the same!
 ---
 
 ## License
