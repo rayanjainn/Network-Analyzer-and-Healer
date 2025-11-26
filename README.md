@@ -3,7 +3,9 @@
 ![Last Commit](https://img.shields.io/github/last-commit/Th3C0d3Mast3r/Network-Analyzer-and-Healer)
 ![Version](https://img.shields.io/github/v/tag/Th3C0d3Mast3r/Network-Analyzer-and-Healer?label=VERSION&color=brightgreen&logo=git)
 
-# Network Analyzer & Healer  
+![netforge image](./images/Network%20Analyzer%20and%20Healer.png)
+
+# NetForge - Network Analyzer & Healer  
 - **Centralized log aggregation** :- Rsyslog → Promtail → Loki
     
 - **Host and container metrics** :- Node Exporter & cAdvisor → Prometheus
