@@ -75,6 +75,7 @@ All executed entirely on-premise, without internet or cloud services.
 ├── docker
 │   └── docker-compose.yml
 ├── images
+│   ├── Network Analyzer and Healer.png
 │   ├── healing framework.png
 │   ├── image.png
 │   └── setup_flow.png
